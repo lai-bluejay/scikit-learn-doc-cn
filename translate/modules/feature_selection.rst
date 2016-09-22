@@ -3,35 +3,27 @@
 .. _feature_selection:
 
 =================
-Feature selection
+特征选择
 =================
 
 
-The classes in the :mod:`sklearn.feature_selection` module can be used
-for feature selection/dimensionality reduction on sample sets, either to
-improve estimators' accuracy scores or to boost their performance on very
-high-dimensional datasets.
+模块 :mod:`sklearn.feature_selection` 中的类可以对样例集进行特征选择或降维, 用于提高分类器等的准确性, 也能提升在高维数据集上的模型表现.
 
 
 .. _variance_threshold:
 
-Removing features with low variance
+删除低方差的特征
 ===================================
 
-:class:`VarianceThreshold` is a simple baseline approach to feature selection.
-It removes all features whose variance doesn't meet some threshold.
-By default, it removes all zero-variance features,
-i.e. features that have the same value in all samples.
-
-As an example, suppose that we have a dataset with boolean features,
-and we want to remove all features that are either one or zero (on or off)
-in more than 80% of the samples.
-Boolean features are Bernoulli random variables,
-and the variance of such variables is given by
+方差阈值:class:`VarianceThreshold` 是一种简单的特征选择的基线方法.
+该方法移除了方差未到达阈值的特征.默认情况下, 移除了所有方差为0的特征.比如, 所有样本都相同的特征值.
+试想, 如果有一个布尔值特征的数据集, 我们想要移除样本中, 超过80%的为0/1的特征值(开或关)
+布尔值特征服从伯努利(Bernoulli）分布, 方差由下式给出:
 
 .. math:: \mathrm{Var}[X] = p(1 - p)
 
-so we can select using the threshold ``.8 * (1 - .8)``::
+so we can select using the threshold
+ 所以, 我们可以选择特征阈值为``.8 * (1 - .8)``::
 
   >>> from sklearn.feature_selection import VarianceThreshold
   >>> X = [[0, 0, 1], [0, 1, 0], [1, 0, 0], [0, 1, 1], [0, 1, 0], [0, 1, 1]]
@@ -44,31 +36,24 @@ so we can select using the threshold ``.8 * (1 - .8)``::
          [1, 0],
          [1, 1]])
 
-As expected, ``VarianceThreshold`` has removed the first column,
-which has a probability :math:`p = 5/6 > .8` of containing a zero.
+和预想的一样, ``方差阈值法`` 移除了第一列特征, 该列包含0的概率大于0.8.
 
 .. _univariate_feature_selection:
 
-Univariate feature selection
+单一变量特征选择
 ============================
+单一变量特征选择, 原理是基于单一变量统计检验来选择最好的特征. 可以被视为估计器的一个预处理步骤.Scikit-learn将特征选择过程表现为实现了``transform``方法的对象:
 
-Univariate feature selection works by selecting the best features based on
-univariate statistical tests. It can be seen as a preprocessing step
-to an estimator. Scikit-learn exposes feature selection routines
-as objects that implement the ``transform`` method:
 
- * :class:`SelectKBest` removes all but the :math:`k` highest scoring features
+ * :class:`SelectKBest` 保留了最高分的 :math:`k` 个特征
 
- * :class:`SelectPercentile` removes all but a user-specified highest scoring
-   percentage of features
+ * :class:`SelectPercentile` 保留了用户指定占比的最高分特征
 
- * using common univariate statistical tests for each feature:
-   false positive rate :class:`SelectFpr`, false discovery rate
-   :class:`SelectFdr`, or family wise error :class:`SelectFwe`.
+ * 对每个特征使用普通的单一变量统计检验:
+   假阳性率(false positive rate) :class:`SelectFpr`, 伪发现率(false discovery rate)
+   :class:`SelectFdr`, 或族系误差率(family wise error) :class:`SelectFwe`.
 
- * :class:`GenericUnivariateSelect` allows to perform univariate feature
-    selection with a configurable strategy. This allows to select the best
-    univariate selection strategy with hyper-parameter search estimator.
+ * :class:`GenericUnivariateSelect` 允许使用可配置的策略进行单一变量特征选择. 允许使用超参数搜索估计器的方法, 选择最好的单一变量选取策略.
 
 For instance, we can perform a :math:`\chi^2` test to the samples
 to retrieve only the two best features as follows:
