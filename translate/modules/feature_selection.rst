@@ -55,8 +55,7 @@ so we can select using the threshold
 
  * :class:`GenericUnivariateSelect` 允许使用可配置的策略进行单一变量特征选择. 允许使用超参数搜索估计器的方法, 选择最好的单一变量选取策略.
 
-For instance, we can perform a :math:`\chi^2` test to the samples
-to retrieve only the two best features as follows:
+例如, 我们可以对样本ོ进行卡方检验, 检索到最好的两个特征, 示例代码如下:
 
   >>> from sklearn.datasets import load_iris
   >>> from sklearn.feature_selection import SelectKBest
@@ -69,22 +68,22 @@ to retrieve only the two best features as follows:
   >>> X_new.shape
   (150, 2)
 
-These objects take as input a scoring function that returns
-univariate p-values:
+这些对象输入一个计分函数, 返回单变量的P值.
+[译注:p 值可用来确定结果在统计意义上是否显著。p 值通常用在假设检验中，在检验中，您可以否定或无法否定一个原假设。
+执行假设检验时，要注意的关键输出信息就是 p 值。
+p 值的范围为 0 到 1。p 值是一个概率，用来度量否定原假设的证据。概率越低，否定原假设的证据越充分。]
 
- * For regression: :func:`f_regression`
 
- * For classification: :func:`chi2` or :func:`f_classif`
+ * 回归: :func:`f_regression`
 
-.. topic:: Feature selection with sparse data
+ * 分类: :func:`chi2` or :func:`f_classif`
 
-   If you use sparse data (i.e. data represented as sparse matrices),
-   only :func:`chi2` will deal with the data without making it dense.
+.. topic:: 稀疏数据集的特征选择
+
+   如果你使用稀疏数据集 (例如, 数据集用稀疏矩阵表示), 只有卡方:func:`chi2` 处理数据不会使得数据变得致密.
 
 .. warning::
-
-    Beware not to use a regression scoring function with a classification
-    problem, you will get useless results.
+   注意在分类问题中, 不要使用回归的计分函数, 因为会得到无用的结果.
 
 .. topic:: Examples:
 
@@ -93,12 +92,11 @@ univariate p-values:
 .. _rfe:
 
 Recursive feature elimination
+递归特征消除
 =============================
-
-Given an external estimator that assigns weights to features (e.g., the
-coefficients of a linear model), recursive feature elimination (:class:`RFE`)
-is to select features by recursively considering smaller and smaller sets of
-features.  First, the estimator is trained on the initial set of features and
+给定一个外部的估计器来分配特征权重 (例如, 线性模型的系数.) , 递归特征消除(:class:`RFE`)通过递归考虑越来越小的特征集来选择特征.
+首先, 用初始特征集来训练估计器,并对
+First, the estimator is trained on the initial set of features and
 weights are assigned to each one of them. Then, features whose absolute weights
 are the smallest are pruned from the current set features. That procedure is
 recursively repeated on the pruned set until the desired number of features to
