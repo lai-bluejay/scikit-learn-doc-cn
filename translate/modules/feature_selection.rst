@@ -95,56 +95,42 @@ Recursive feature elimination
 递归特征消除
 =============================
 给定一个外部的估计器来分配特征权重 (例如, 线性模型的系数.) , 递归特征消除(:class:`RFE`)通过递归考虑越来越小的特征集来选择特征.
-首先, 用初始特征集来训练估计器,并对
-First, the estimator is trained on the initial set of features and
-weights are assigned to each one of them. Then, features whose absolute weights
-are the smallest are pruned from the current set features. That procedure is
-recursively repeated on the pruned set until the desired number of features to
-select is eventually reached.
+首先, 用初始特征集来训练估计器,并对每个特征分配权重. 然后, 特征集中绝对权重最小的特征被剪枝. 该过程会递归地重复对特征集进行剪枝, 直至达到最终期望数量的特征.
 
-:class:`RFECV` performs RFE in a cross-validation loop to find the optimal
-number of features.
+:class:`RFECV` 利用交叉验证循环来进行递归特征消除(RFE,  Recursive feature elimination), 以此发现最优的特征数量.
 
-.. topic:: Examples:
+.. topic:: 示例:
 
-    * :ref:`example_feature_selection_plot_rfe_digits.py`: A recursive feature elimination example
-      showing the relevance of pixels in a digit classification task.
+    * :ref:`example_feature_selection_plot_rfe_digits.py`: 显示了像素相关性在数字分类任务中的递归特征消除的例子.
 
-    * :ref:`example_feature_selection_plot_rfe_with_cross_validation.py`: A recursive feature
-      elimination example with automatic tuning of the number of features
-      selected with cross-validation.
+    * :ref:`example_feature_selection_plot_rfe_with_cross_validation.py`:  利用交叉验证对特征数量进行自动剪枝的例子.
+
 
 .. _select_from_model:
 
-Feature selection using SelectFromModel
+使用 SelectFromModel进行特征选择.
 =======================================
 
-:class:`SelectFromModel` is a meta-transformer that can be used along with any
-estimator that has a ``coef_`` or ``feature_importances_`` attribute after fitting.
-The features are considered unimportant and removed, if the corresponding
-``coef_`` or ``feature_importances_`` values are below the provided
-``threshold`` parameter. Apart from specifying the threshold numerically,
-there are build-in heuristics for finding a threshold using a string argument.
-Available heuristics are "mean", "median" and float multiples of these like
-"0.1*mean".
+:class:`SelectFromModel`是一种元数据转换器, 能使用任何在拟合之后包含``coef_``或``feature_importances_``属性的估计器.
+如果特征相应的``coef``或``feature_importances_``低于给定的阈值``threshold``, 该特征会被认为不重要且被移除. 除了数值上指定的阈值参数, 还提供了字符串参数用于内置的启发式搜索.
+可用的启发式参数包括均值(mean), 中位数(median), 以及浮点数和这些值的乘积(0.1*mean).
+如何使用请参考后文的版块.
 
-For examples on how it is to be used refer to the sections below.
+.. topic:: 示例
 
-.. topic:: Examples
-
-    * :ref:`example_feature_selection_plot_select_from_model_boston.py`: Selecting the two
-      most important features from the Boston dataset without knowing the
-      threshold beforehand.
+    * :ref:`example_feature_selection_plot_select_from_model_boston.py`: 在预先不知道阈值的情况下, 从波士顿数据集中选择最重要的聊个特征.
 
 .. _l1_feature_selection:
 
-L1-based feature selection
+基于L1的特征选择
 --------------------------
 
 .. currentmodule:: sklearn
 
-:ref:`Linear models <linear_model>` penalized with the L1 norm have
-sparse solutions: many of their estimated coefficients are zero. When the goal
+线性模型 :ref:`Linear models <linear_model>` 采用L1范式惩罚, 存在稀疏解: 大部分的估计器的置信度为0.
+当目标是通过其他分类器对数据进行降维, 可以使用
+ When the
+goal
 is to reduce the dimensionality of the data to use with another classifier,
 they can be used along with :class:`feature_selection.SelectFromModel`
 to select the non-zero coefficients. In particular, sparse estimators useful for
