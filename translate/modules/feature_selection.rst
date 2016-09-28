@@ -127,16 +127,9 @@ Recursive feature elimination
 
 .. currentmodule:: sklearn
 
-线性模型 :ref:`Linear models <linear_model>` 采用L1范式惩罚, 存在稀疏解: 大部分的估计器的置信度为0.
-当目标是通过其他分类器对数据进行降维, 可以使用
- When the
-goal
-is to reduce the dimensionality of the data to use with another classifier,
-they can be used along with :class:`feature_selection.SelectFromModel`
-to select the non-zero coefficients. In particular, sparse estimators useful for
-this purpose are the :class:`linear_model.Lasso` for regression, and
-of :class:`linear_model.LogisticRegression` and :class:`svm.LinearSVC`
-for classification::
+线性模型 :ref:`Linear models <linear_model>` 采用L1范数惩罚, 存在稀疏解: 大部分的估计器的系数为0.
+当目标是通过其他分类器对数据进行降维, 可以使用:class:`feature_selection.SelectFromModel`选择系数非零的特征. 稀疏的估计器在这个目标中特别有用,
+回归中是:class:`linear_model.Lasso`, 分类中是:class:`linear_model.LogisticRegression` 和 :class:`svm.LinearSVC`
 
   >>> from sklearn.svm import LinearSVC
   >>> from sklearn.datasets import load_iris
@@ -146,42 +139,26 @@ for classification::
   >>> X.shape
   (150, 4)
   >>> lsvc = LinearSVC(C=0.01, penalty="l1", dual=False).fit(X, y)
-  >>> model = SelectFromModel(lsvc, prefit=True)
+  >>> model = SelectFromModel(lsvc, prefit=True
   >>> X_new = model.transform(X)
   >>> X_new.shape
   (150, 3)
 
-With SVMs and logistic-regression, the parameter C controls the sparsity:
-the smaller C the fewer features selected. With Lasso, the higher the
-alpha parameter, the fewer features selected.
+对于SVM和逻辑回归, 参数C控制了稀疏性, C越小则会选择越小的特征. 对于Lasso, 越高的alpha参数会选择越少的特征.
 
-.. topic:: Examples:
+.. topic:: 示例:
 
-    * :ref:`example_text_document_classification_20newsgroups.py`: Comparison
-      of different algorithms for document classification including L1-based
-      feature selection.
+    * :ref:`example_text_document_classification_20newsgroups.py`: 使用基于L1的特征选择方法, 比较了不同算法在文本分类中的表现.
 
 .. _compressive_sensing:
 
-.. topic:: **L1-recovery and compressive sensing**
+.. topic:: **L1恢复和压缩感知**
 
-   For a good choice of alpha, the :ref:`lasso` can fully recover the
-   exact set of non-zero variables using only few observations, provided
-   certain specific conditions are met. In particular, the number of
-   samples should be "sufficiently large", or L1 models will perform at
-   random, where "sufficiently large" depends on the number of non-zero
-   coefficients, the logarithm of the number of features, the amount of
-   noise, the smallest absolute value of non-zero coefficients, and the
-   structure of the design matrix X. In addition, the design matrix must
-   display certain specific properties, such as not being too correlated.
+   因为选择一个好的alpha参数, :ref:`lasso`能够只通过极少量的观测值完全恢复抽取的非零变量集,只需要提供确定的特殊条件. 特别地, 样本数量需要"足够大", 否则L1模型会表现得随机.
+   "足够大"取决于非零系数的数值, 特征数量的对数, 噪音的数量, 非零系数的最小绝对值, 特征矩阵X的结构. 另外,  特征矩阵X必须显示出特定的属性, 比如不会过于相关.
 
-   There is no general rule to select an alpha parameter for recovery of
-   non-zero coefficients. It can by set by cross-validation
-   (:class:`LassoCV` or :class:`LassoLarsCV`), though this may lead to
-   under-penalized models: including a small number of non-relevant
-   variables is not detrimental to prediction score. BIC
-   (:class:`LassoLarsIC`) tends, on the opposite, to set high values of
-   alpha.
+   没有一个通用的规则用于选择alpha参数来恢复非零系数. 可以使用交叉验证的方法(:class:`LassoCV` 或 :class:`LassoLarsCV`), 虽然会导致惩罚不足的模型:包括少量的不相关变量,
+   这些变量不会对预测分数造成损害. 与此相反, BIC(:class:`LassoLarsIC`)如果设置过高的alpha值会损害预测值.
 
    **Reference** Richard G. Baraniuk "Compressive Sensing", IEEE Signal
    Processing Magazine [120] July 2007
@@ -190,36 +167,25 @@ alpha parameter, the fewer features selected.
 .. _randomized_l1:
 
 Randomized sparse models
+随机稀疏模型
 -------------------------
 
 .. currentmodule:: sklearn.linear_model
+基于L1的稀疏模型的局限性在于, 对于一组相关性很高的特征, 只选择其中一个. 为缓解这个问题,可以使用随机化技术, 对稀疏模型进行多次重新估计, 打乱特征矩阵;或者对数据进行子采样, 并统计回归器被使用了多少次.
 
-The limitation of L1-based sparse models is that faced with a group of
-very correlated features, they will select only one. To mitigate this
-problem, it is possible to use randomization techniques, reestimating the
-sparse model many times perturbing the design matrix or sub-sampling data
-and counting how many times a given regressor is selected.
-
-:class:`RandomizedLasso` implements this strategy for regression
-settings, using the Lasso, while :class:`RandomizedLogisticRegression` uses the
-logistic regression and is suitable for classification tasks.  To get a full
-path of stability scores you can use :func:`lasso_stability_path`.
+:class:`RandomizedLasso` 为回归实现了这个策略, 使用Lasso; :class:`RandomizedLogisticRegression`使用逻辑回归, 适用于分类问题. 如果想要获得稳定分数的全路径,
+可以使用函数:func:`lasso_stability_path`.
 
 .. figure:: ../auto_examples/linear_model/images/plot_sparse_recovery_003.png
    :target: ../auto_examples/linear_model/plot_sparse_recovery.html
    :align: center
    :scale: 60
 
-Note that for randomized sparse models to be more powerful than standard
-F statistics at detecting non-zero features, the ground truth model
-should be sparse, in other words, there should be only a small fraction
-of features non zero.
+注意随机化的稀疏模型在检测非零特征上,比标准F统计更加强大. 基础真实模型应该是稀疏的, 也就是说, 应该只有很小的一部分特征是非零的.
 
 .. topic:: Examples:
 
-   * :ref:`example_linear_model_plot_sparse_recovery.py`: An example
-     comparing different feature selection approaches and discussing in
-     which situation each approach is to be favored.
+   * :ref:`example_linear_model_plot_sparse_recovery.py`: 一个比较不同特征选择方法, 讨论了在不同的情况下改选择哪种方法.
 
 .. topic:: References:
 
@@ -230,14 +196,10 @@ of features non zero.
    * F. Bach, "Model-Consistent Sparse Estimation through the Bootstrap"
      http://hal.inria.fr/hal-00354771/
 
-Tree-based feature selection
+基于树的特征选择
 ----------------------------
 
-Tree-based estimators (see the :mod:`sklearn.tree` module and forest
-of trees in the :mod:`sklearn.ensemble` module) can be used to compute
-feature importances, which in turn can be used to discard irrelevant
-features (when coupled with the :class:`sklearn.feature_selection.SelectFromModel`
-meta-transformer)::
+基于树的估计器(树:mod:`sklearn.tree`和森林 :mod:`sklearn.ensemble`)能用于计算特征重要性, 从而可以丢弃不相关的特征(当和 :class:`sklearn.feature_selection.SelectFromModel`  一起使用时):
 
   >>> from sklearn.ensemble import ExtraTreesClassifier
   >>> from sklearn.datasets import load_iris
@@ -257,19 +219,14 @@ meta-transformer)::
 
 .. topic:: Examples:
 
-    * :ref:`example_ensemble_plot_forest_importances.py`: example on
-      synthetic data showing the recovery of the actually meaningful
-      features.
+    * :ref:`example_ensemble_plot_forest_importances.py`: 如何在合成数据上恢复有实际意义的特征.
 
-    * :ref:`example_ensemble_plot_forest_importances_faces.py`: example
-      on face recognition data.
+    * :ref:`example_ensemble_plot_forest_importances_faces.py`: 人脸识别的示例.
 
-Feature selection as part of a pipeline
+作为流水线(pipeline)一部分的特征选择
 =======================================
 
-Feature selection is usually used as a pre-processing step before doing
-the actual learning. The recommended way to do this in scikit-learn is
-to use a :class:`sklearn.pipeline.Pipeline`::
+在机器学习中, 特征学习通常作为一个预处理的步骤. 建议使用 :class:`sklearn.pipeline.Pipeline`: 进行特征选择
 
   clf = Pipeline([
     ('feature_selection', SelectFromModel(LinearSVC(penalty="l1"))),
@@ -277,11 +234,6 @@ to use a :class:`sklearn.pipeline.Pipeline`::
   ])
   clf.fit(X, y)
 
-In this snippet we make use of a :class:`sklearn.svm.LinearSVC`
-coupled with :class:`sklearn.feature_selection.SelectFromModel`
-to evaluate feature importances and select the most relevant features.
-Then, a :class:`sklearn.ensemble.RandomForestClassifier` is trained on the
-transformed output, i.e. using only relevant features. You can perform
-similar operations with the other feature selection methods and also
-classifiers that provide a way to evaluate feature importances of course.
-See the :class:`sklearn.pipeline.Pipeline` examples for more details.
+在这段代码中, 我们使用线性SVC :class:`sklearn.svm.LinearSVC`和 :class:`sklearn.feature_selection.SelectFromModel` 来评估特征重要性,
+并选择最相关的特征. 然后, 训练随机森林:class:`sklearn.ensemble.RandomForestClassifier`输出分类结果, 仅使用相关特征. 也可以使用其他特征选择方法来进行这个过程,
+分类器也提供了评估特征重要性的方法. 可以在这里了解更多细节:  :class:`sklearn.pipeline.Pipeline`
